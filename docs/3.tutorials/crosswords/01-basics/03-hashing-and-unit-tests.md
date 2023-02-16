@@ -85,32 +85,6 @@ Note that the test command we ran had additional flags. Those flags told Rust *n
 
 The unit test above is meant for debugging and quickly running snippets of code. Some may find this a useful technique when getting familiar with Rust and writing smart contracts. Next we'll write a real unit test that applies to this early version of our crossword puzzle contract.
 
-## Write a regular unit test
-
-Let's add this unit test (inside the `mod tests {}` block, under our previous unit test) and analyze it:
-
-```rust reference
-https://github.com/near-examples/crossword-tutorial-chapter-1/blob/d7699cf35092024fe11719b68788436c82fe82af/contract/src/lib.rs#L63-L93
-```
-
-The first few lines of code will be used commonly when writing unit tests. It uses the `VMContextBuilder` to create some basic context for a transaction, then sets up the testing environment.
-
-Next, an object is created representing the contract and the `set_solution` function is called. After that, the `guess_solution` function is called twice: first with the incorrect solution and then the correct one. We can check the logs to determine that the function is acting as expected.
-
-:::info Note on assertions
-This unit test uses the [`assert_eq!`](https://doc.rust-lang.org/std/macro.assert_eq.html) macro. Similar macros like [`assert!`](https://doc.rust-lang.org/std/macro.assert.html) and [`assert_ne!`](https://doc.rust-lang.org/std/macro.assert_ne.html) are commonly used in Rust. These are great to use in unit tests. However, these will add unnecessary overhead when added to contract logic, and it's recommended to use the [`require!` macro](https://docs.rs/near-sdk/4.0.0-pre.2/near_sdk/macro.require.html). See more information on this and [other efficiency tips here](/sdk/rust/contract-size).
-:::
-
-Again, we can run all the unit tests with:
-
-    cargo test -- --nocapture
-
-:::tip Run only one test
-To only run this latest test, use the command:
-
-    cargo test check_guess_solution -- --nocapture
-:::
-
 ## Modifying `set_solution`
 
 The [overview section](00-overview.md) of this chapter tells us we want to have a single crossword puzzle and the user solving the puzzle should not be able to know the solution. Using a hash addresses this, and we can keep `crossword_solution`'s field type, as `String` will work just fine. The overview also indicates we only want the author of the crossword puzzle to be able to set the solution. As it stands, our function `set_solution` can be called by anyone with a full-access key. It's trivial for someone to create a NEAR account and call this function, changing the solution. Let's fix that.
@@ -142,6 +116,32 @@ near call crossword.friend.testnet new '{"solution": "69c2feb084439956193f4c2193
 
 Now the crossword solution, as a hash, is stored instead. If you try calling the last command again, you'll get the error message, thanks to the `#[init]` macro:
 `The contract has already been initialized`
+
+## Write a regular unit test
+
+Let's add this unit test (inside the `mod tests {}` block, under our previous unit test) and analyze it:
+
+```rust reference
+https://github.com/near-examples/crossword-tutorial-chapter-1/blob/d7699cf35092024fe11719b68788436c82fe82af/contract/src/lib.rs#L63-L93
+```
+
+The first few lines of code will be used commonly when writing unit tests. It uses the `VMContextBuilder` to create some basic context for a transaction, then sets up the testing environment.
+
+Next, an object is created representing the contract and the `set_solution` function is called. After that, the `guess_solution` function is called twice: first with the incorrect solution and then the correct one. We can check the logs to determine that the function is acting as expected.
+
+:::info Note on assertions
+This unit test uses the [`assert_eq!`](https://doc.rust-lang.org/std/macro.assert_eq.html) macro. Similar macros like [`assert!`](https://doc.rust-lang.org/std/macro.assert.html) and [`assert_ne!`](https://doc.rust-lang.org/std/macro.assert_ne.html) are commonly used in Rust. These are great to use in unit tests. However, these will add unnecessary overhead when added to contract logic, and it's recommended to use the [`require!` macro](https://docs.rs/near-sdk/4.0.0-pre.2/near_sdk/macro.require.html). See more information on this and [other efficiency tips here](/sdk/rust/contract-size).
+:::
+
+Again, we can run all the unit tests with:
+
+    cargo test -- --nocapture
+
+:::tip Run only one test
+To only run this latest test, use the command:
+
+    cargo test check_guess_solution -- --nocapture
+:::
 
 ## First use of Batch Actions
 
